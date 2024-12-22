@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-zig
-        VERSION "1.1.1"
+        VERSION "1.1.2"
         DESCRIPTION "Zig grammar for tree-sitter"
         HOMEPAGE_URL "https://github.com/tree-sitter-grammars/tree-sitter-zig"
         LANGUAGES C)
