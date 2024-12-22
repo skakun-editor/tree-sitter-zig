@@ -4,7 +4,7 @@ endif
 
 LANGUAGE_NAME := tree-sitter-zig
 HOMEPAGE_URL := https://github.com/tree-sitter-grammars/tree-sitter-zig
-VERSION := 1.0.2
+VERSION := 1.1.0
 
 # repository
 SRC_DIR := src
