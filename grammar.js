@@ -248,7 +248,6 @@ module.exports = grammar({
     ),
 
     opaque_declaration: $ => seq(
-      optional(choice('extern', 'packed')),
       'opaque',
       '{',
       $._container_members,
