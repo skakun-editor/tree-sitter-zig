@@ -1,284 +1,117 @@
-; Variables
+;; Comments
+
+(comment) @comment
+
+;; Punctuation
+
+["(" ")" "," "->" "." ".." "..." ":" ";" "=" "{" "|" "}"] @punctuation
+
+;; Literals
+
+"undefined" @literal
+(boolean) @boolean_literal
+(character) @character_literal
+"'" @character_literal_delimiter
+(character (escape_sequence) @character_literal_escape_sequence)
+"null" @null_literal
+[(integer) (float)] @number_literal
+(string) @string_literal
+(multiline_string) @string_literal
+"\"" @string_literal_delimiter
+"\\\\" @string_literal_delimiter
+(string (escape_sequence) @string_literal_escape_sequence)
+
+;; Operators
+
+(_ operator: _ @operator)
+(variable_declaration "=" @operator)
+[".*" ".?" "*" "?" "!"] @operator
+
+(anonymous_struct_initializer "." @matchfix_operator)
+(initializer_list ["{" "}"] @matchfix_operator)
+(call_expression ["(" ")"] @matchfix_operator)
+(arguments ["(" ")"] @matchfix_operator)
+["[" "]"] @matchfix_operator
+
+(field_expression "." @member_access_operator)
+(error_type "." @member_access_operator)
+
+;; Keywords
+
+["asm" "defer" "errdefer" "error" "comptime"] @keyword
+
+["extern" "packed" "enum" "struct" "union" "opaque"
+ "align" "addrspace" "const" "volatile" "allowzero"
+ "fn" "callconv"] @type_keyword
+(error_set_declaration "error" @type_keyword)
+
+["if" "else" "switch" "=>" "catch" "and" "or" "orelse"] @evaluation_branch
+
+["inline" "while" "for"] @evaluation_loop
+(while_statement (else_clause "else" @evaluation_loop))
+(while_expression "else" @evaluation_loop)
+(for_statement (else_clause "else" @evaluation_loop))
+(for_expression "else" @evaluation_loop)
+
+["break" "continue" "return" "try" "unreachable"] @evaluation_end
+
+"var" @declaration
+(function_declaration "fn" @declaration)
+(comptime_declaration "comptime" @declaration)
+(variable_declaration "const" @declaration)
+
+["pub" "export" "noinline" "threadlocal" "linksection"] @declaration_modifier
+(function_declaration ["extern" "inline"] @declaration_modifier)
+(parameter ["comptime" "noalias"] @declaration_modifier)
+(variable_declaration "extern" @declaration_modifier)
+(container_field ["comptime" "align"] @declaration_modifier)
+
+;; Identifiers
 
 (identifier) @variable
-
-; Parameters
-
-(parameter
-  name: (identifier) @variable.parameter)
-
-; Types
-
-(parameter
-  type: (identifier) @type)
+(identifier "@" @variable_delimiter (string "\"" @variable_delimiter) @variable)
+(identifier (string (escape_sequence) @variable_escape_sequence))
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z_][a-zA-Z0-9_]*"))
-
-(variable_declaration
-  (identifier) @type
-  "="
-  [
-    (struct_declaration)
-    (enum_declaration)
-    (union_declaration)
-    (opaque_declaration)
-  ])
-
-[
-  (builtin_type)
-  "anyframe"
-] @type.builtin
-
-; Constants
+ (#match? @type "^[A-Z]"))
 
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]+$"))
+ (#match? @constant "^[A-Z_][A-Z_0-9]*$"))
 
-[
-  "null"
-  "unreachable"
-  "undefined"
-] @constant.builtin
+(member_identifier) @member_variable
+(member_identifier "@" @member_variable_delimiter (string "\"" @member_variable_delimiter))
+(member_identifier (string (escape_sequence) @member_variable_escape_sequence))
 
-(field_expression
-  .
-  member: (identifier) @constant)
+((member_identifier) @member_type
+ (#match? @member_type "^[A-Z]"))
 
-(enum_declaration
-  (container_field
-    type: (identifier) @constant))
-
-; Labels
-
-(block_label (identifier) @label)
-
-(break_label (identifier) @label)
-
-; Fields
-
-(field_initializer
-  name: (identifier) @variable.member)
-
-(field_expression
-  (_)
-  member: (identifier) @variable.member)
-
-(container_field
-  name: (identifier) @variable.member)
-
-; Functions
-
-(builtin_identifier) @function.builtin
+((member_identifier) @member_constant
+ (#match? @member_constant "^[A-Z_][A-Z_0-9]*$"))
 
 (call_expression
-  function: (identifier) @function.call)
+ function: [(identifier) @function
+            (_ member: _ @member_function)])
 
 (call_expression
-  function: (field_expression
-    member: (identifier) @function.call))
+ function: [(identifier) @_name @type
+            (_ member: _ @_name @member_type)]
+ (#match? @_name "^[A-Z]"))
 
-(function_declaration
-  name: (identifier) @function)
+(_ type: [(identifier) @type
+          (_ member: _ @member_type)])
 
-; Modules
+(builtin_identifier) @builtin_function
+(builtin_type) @builtin_type
 
-(variable_declaration
-  (identifier) @module
-  (builtin_function
-    (builtin_identifier) @keyword.import
-    (#any-of? @keyword.import "@import" "@cImport")))
+(error_type (identifier) @constant)
 
-; Builtins
+(function_declaration name: _ @function)
+(parameter name: _ @function_parameter)
+"..." @special_function_parameter
 
-[
-  "c"
-  "..."
-] @variable.builtin
+;; Query precedence fixes
 
-((identifier) @variable.builtin
-  (#eq? @variable.builtin "_"))
-
-(calling_convention
-  (identifier) @variable.builtin)
-
-; Keywords
-
-[
-  "asm"
-  "defer"
-  "errdefer"
-  "test"
-  "error"
-  "const"
-  "var"
-] @keyword
-
-[
-  "struct"
-  "union"
-  "enum"
-  "opaque"
-] @keyword.type
-
-[
-  "async"
-  "await"
-  "suspend"
-  "nosuspend"
-  "resume"
-] @keyword.coroutine
-
-"fn" @keyword.function
-
-[
-  "and"
-  "or"
-  "orelse"
-] @keyword.operator
-
-"return" @keyword.return
-
-[
-  "if"
-  "else"
-  "switch"
-] @keyword.conditional
-
-[
-  "for"
-  "while"
-  "break"
-  "continue"
-] @keyword.repeat
-
-[
-  "usingnamespace"
-  "export"
-] @keyword.import
-
-[
-  "try"
-  "catch"
-] @keyword.exception
-
-[
-  "volatile"
-  "allowzero"
-  "noalias"
-  "addrspace"
-  "align"
-  "callconv"
-  "linksection"
-  "pub"
-  "inline"
-  "noinline"
-  "extern"
-  "comptime"
-  "packed"
-  "threadlocal"
-] @keyword.modifier
-
-; Operator
-
-[
-  "="
-  "*="
-  "*%="
-  "*|="
-  "/="
-  "%="
-  "+="
-  "+%="
-  "+|="
-  "-="
-  "-%="
-  "-|="
-  "<<="
-  "<<|="
-  ">>="
-  "&="
-  "^="
-  "|="
-  "!"
-  "~"
-  "-"
-  "-%"
-  "&"
-  "=="
-  "!="
-  ">"
-  ">="
-  "<="
-  "<"
-  "&"
-  "^"
-  "|"
-  "<<"
-  ">>"
-  "<<|"
-  "+"
-  "++"
-  "+%"
-  "-%"
-  "+|"
-  "-|"
-  "*"
-  "/"
-  "%"
-  "**"
-  "*%"
-  "*|"
-  "||"
-  ".*"
-  ".?"
-  "?"
-  ".."
-] @operator
-
-; Literals
-
-(character) @character
-
-([
-  (string)
-  (multiline_string)
-] @string
-  (#set! "priority" 95))
-
-(integer) @number
-
-(float) @number.float
-
-(boolean) @boolean
-
-(escape_sequence) @string.escape
-
-; Punctuation
-
-[
-  "["
-  "]"
-  "("
-  ")"
-  "{"
-  "}"
-] @punctuation.bracket
-
-[
-  ";"
-  "."
-  ","
-  ":"
-  "=>"
-  "->"
-] @punctuation.delimiter
-
-(payload "|" @punctuation.bracket)
-
-; Comments
-
-(comment) @comment @spell
-
-((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^//!"))
+(asm_output_item ["[" "]"] @punctuation)
+(asm_input_item ["[" "]"] @punctuation)
+(asm_expression "volatile" @keyword)
+(switch_case "inline" @evaluation_branch)
