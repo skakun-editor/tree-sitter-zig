@@ -58,7 +58,7 @@ module.exports = grammar({
     [$.for_expression],
     [$.while_expression],
 
-    [$.expression, $._function_prototype],
+    [$.expression, $._function_prototype_tail],
     [$.expression, $.if_type_expression],
 
     [$.comptime_type_expression, $.expression],
@@ -76,6 +76,7 @@ module.exports = grammar({
 
   precedences: $ => [
     [$.container_field, $.type_expression],
+    [$.function_declaration_scope, $._function_prototype],
   ],
 
   supertypes: $ => [
@@ -122,7 +123,7 @@ module.exports = grammar({
       optional('comptime'),
       choice(
         seq(
-          field('name', choice($.identifier, $._reserved_identifier, alias($.builtin_type, $.identifier))),
+          field('name', alias(choice($.identifier, $._reserved_identifier, $.builtin_type), $.member_identifier)),
           ':',
           field('type', choice($.primary_type_expression, $.if_type_expression, $.comptime_type_expression)),
         ),
@@ -175,7 +176,7 @@ module.exports = grammar({
 
     _variable_declaration_header: $ => prec(1, seq(
       choice('const', 'var'),
-      $.identifier,
+      field('name', $.identifier),
       optional(seq(
         ':',
         field('type', choice($.type_expression, $.if_type_expression, $.comptime_type_expression)),
@@ -193,16 +194,24 @@ module.exports = grammar({
         'inline',
         'noinline',
       )),
-      $._function_prototype,
+      $._function_prototype_head,
+      $.function_declaration_scope,
+    ),
+
+    function_declaration_scope: $ => seq(
+      $._function_prototype_tail,
       choice(
         ';',
         field('body', $.block),
       ),
     ),
 
-    _function_prototype: $ => seq(
+    _function_prototype_head: $ => seq(
       'fn',
       optional(field('name', $.identifier)),
+    ),
+
+    _function_prototype_tail: $ => seq(
       $.parameters,
       optional($.byte_alignment),
       optional($.address_space),
@@ -210,6 +219,8 @@ module.exports = grammar({
       optional($.calling_convention),
       field('type', choice($.type_expression, $.if_type_expression, $.comptime_type_expression)),
     ),
+
+    _function_prototype: $ => seq($._function_prototype_head, $._function_prototype_tail),
 
     parameters: $ => seq('(', optionalCommaSep($.parameter), ')'),
 
@@ -694,7 +705,7 @@ module.exports = grammar({
     field_expression: $ => prec(PREC.MEMBER, seq(
       optional(field('object', $.expression)),
       '.',
-      field('member', $.identifier),
+      field('member', alias($.identifier, $.member_identifier)),
     )),
 
     index_expression: $ => prec(PREC.MEMBER, seq(
@@ -737,9 +748,9 @@ module.exports = grammar({
 
     field_initializer: $ => seq(
       '.',
-      field('name', $.identifier),
+      field('name', alias($.identifier, $.member_identifier)),
       '=',
-      $.expression,
+      field('value', $.expression),
     ),
 
     labeled_type_expression: $ => seq($.block_label, $.block),
