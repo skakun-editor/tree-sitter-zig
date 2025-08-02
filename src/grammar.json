@@ -765,20 +765,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "_function_prototype_head"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "function_declaration_scope"
-        }
-      ]
-    },
-    "function_declaration_scope": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_function_prototype_tail"
+          "name": "_function_prototype"
         },
         {
           "type": "CHOICE",
@@ -799,7 +786,7 @@
         }
       ]
     },
-    "_function_prototype_head": {
+    "_function_prototype": {
       "type": "SEQ",
       "members": [
         {
@@ -821,12 +808,7 @@
               "type": "BLANK"
             }
           ]
-        }
-      ]
-    },
-    "_function_prototype_tail": {
-      "type": "SEQ",
-      "members": [
+        },
         {
           "type": "SYMBOL",
           "name": "parameters"
@@ -899,19 +881,6 @@
               }
             ]
           }
-        }
-      ]
-    },
-    "_function_prototype": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_function_prototype_head"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_function_prototype_tail"
         }
       ]
     },
@@ -6453,7 +6422,7 @@
     ],
     [
       "expression",
-      "_function_prototype_tail"
+      "_function_prototype"
     ],
     [
       "expression",
@@ -6477,16 +6446,6 @@
       {
         "type": "SYMBOL",
         "name": "type_expression"
-      }
-    ],
-    [
-      {
-        "type": "SYMBOL",
-        "name": "function_declaration_scope"
-      },
-      {
-        "type": "SYMBOL",
-        "name": "_function_prototype"
       }
     ]
   ],

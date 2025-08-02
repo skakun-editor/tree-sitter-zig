@@ -58,7 +58,7 @@ module.exports = grammar({
     [$.for_expression],
     [$.while_expression],
 
-    [$.expression, $._function_prototype_tail],
+    [$.expression, $._function_prototype],
     [$.expression, $.if_type_expression],
 
     [$.comptime_type_expression, $.expression],
@@ -76,7 +76,6 @@ module.exports = grammar({
 
   precedences: $ => [
     [$.container_field, $.type_expression],
-    [$.function_declaration_scope, $._function_prototype],
   ],
 
   supertypes: $ => [
@@ -194,24 +193,16 @@ module.exports = grammar({
         'inline',
         'noinline',
       )),
-      $._function_prototype_head,
-      $.function_declaration_scope,
-    ),
-
-    function_declaration_scope: $ => seq(
-      $._function_prototype_tail,
+      $._function_prototype,
       choice(
         ';',
         field('body', $.block),
       ),
     ),
 
-    _function_prototype_head: $ => seq(
+    _function_prototype: $ => seq(
       'fn',
       optional(field('name', $.identifier)),
-    ),
-
-    _function_prototype_tail: $ => seq(
       $.parameters,
       optional($.byte_alignment),
       optional($.address_space),
@@ -219,8 +210,6 @@ module.exports = grammar({
       optional($.calling_convention),
       field('type', choice($.type_expression, $.if_type_expression, $.comptime_type_expression)),
     ),
-
-    _function_prototype: $ => seq($._function_prototype_head, $._function_prototype_tail),
 
     parameters: $ => seq('(', optionalCommaSep($.parameter), ')'),
 

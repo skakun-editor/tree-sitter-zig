@@ -1353,42 +1353,22 @@
     "type": "function_declaration",
     "named": true,
     "fields": {
-      "name": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "function_declaration_scope",
-          "named": true
-        },
-        {
-          "type": "string",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "function_declaration_scope",
-    "named": true,
-    "fields": {
       "body": {
         "multiple": false,
         "required": false,
         "types": [
           {
             "type": "block",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
             "named": true
           }
         ]
@@ -1434,6 +1414,10 @@
         },
         {
           "type": "parameters",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         }
       ]
