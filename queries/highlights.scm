@@ -103,7 +103,8 @@
 (builtin_identifier) @builtin_function
 (builtin_type) @builtin_type
 
-(error_type (identifier) @constant)
+(error_type (identifier) @member_constant)
+(error_set_declaration (identifier) @member_constant)
 
 (function_declaration name: _ @function)
 (parameter name: _ @function_parameter)
